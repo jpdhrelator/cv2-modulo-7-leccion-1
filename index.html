@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Actividad práctica de Vue 3 con Composition API — Módulo 7, Lección 1.">
+<title>Actividad Práctica · Cartelera Cultural — Vue 3 Composition API</title>
+<style>
+  :root{
+    --bg:#f5f6f8;
+    --surface:#ffffff;
+    --surface-2:#eef1f4;
+    --ink:#181c22;
+    --ink-soft:#59646f;
+    --line:#dfe4e9;
+    --brand:#42b883;
+    --brand-ink:#0d2b1e;
+    --brand-dark:#2b8460;
+    --accent:#2c3e50;
+    --warn:#d98a1f;
+    --warn-bg:#fdf6e8;
+    --danger:#c0392b;
+    --radius:14px;
+    --shadow:0 1px 3px rgba(16,24,32,.06), 0 8px 24px rgba(16,24,32,.05);
+  }
+
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#12161b;
+      --surface:#1a2027;
+      --surface-2:#222a33;
+      --ink:#e8edf2;
+      --ink-soft:#9aa7b4;
+      --line:#2b343e;
+      --accent:#8fd8b6;
+      --brand-dark:#5fd39f;
+      --warn:#e8b45c;
+      --warn-bg:#2b2416;
+      --danger:#f08b7f;
+      --shadow:0 1px 3px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.25);
+    }
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .wrap{max-width:900px;margin:0 auto;padding:0 1.5rem;}
+
+  /* ---------- HERO ---------- */
+  header.hero{
+    background:linear-gradient(140deg,#1f2d3d 0%,#16212c 55%,#12333f 100%);
+    color:#f2f6f9;
+    padding:3.5rem 0 3rem;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .kicker{
+    display:inline-flex;align-items:center;gap:.5rem;
+    background:rgba(66,184,131,.16);
+    color:#7de3b3;
+    border:1px solid rgba(66,184,131,.35);
+    font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+    padding:.35rem .85rem;border-radius:999px;margin-bottom:1.25rem;
+  }
+  header.hero h1{
+    margin:0 0 .75rem;
+    font-size:clamp(1.75rem,4.5vw,2.6rem);
+    line-height:1.15;letter-spacing:-.02em;
+  }
+  header.hero .lead{margin:0;color:#b6c6d3;max-width:62ch;font-size:1.05rem;}
+
+  .hero-facts{
+    display:flex;flex-wrap:wrap;gap:.75rem;margin-top:2rem;
+  }
+  .fact{
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:10px;padding:.6rem 1rem;font-size:.85rem;color:#cfdbe5;
+  }
+  .fact strong{display:block;color:#fff;font-size:1rem;}
+
+  /* ---------- BLOQUES ---------- */
+  main{padding:3rem 0 6rem;}
+
+  section.bloque{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:2rem;
+    margin-bottom:1.75rem;
+  }
+
+  .bloque__head{
+    display:flex;align-items:baseline;gap:1rem;
+    margin:0 0 1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--line);
+    flex-wrap:wrap;
+  }
+  .num{
+    flex:0 0 auto;
+    width:2.25rem;height:2.25rem;border-radius:8px;
+    background:var(--brand);color:var(--brand-ink);
+    display:grid;place-items:center;font-weight:800;font-size:1rem;
+  }
+  .bloque__head h2{margin:0;font-size:1.3rem;line-height:1.3;flex:1 1 240px;letter-spacing:-.01em;}
+  .tag{
+    font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--brand-dark);background:rgba(66,184,131,.12);
+    border:1px solid rgba(66,184,131,.3);
+    padding:.25rem .6rem;border-radius:999px;white-space:nowrap;
+  }
+
+  h3{margin:1.75rem 0 .5rem;font-size:1rem;color:var(--accent);letter-spacing:.01em;}
+  h3:first-of-type{margin-top:0;}
+
+  p{margin:0 0 1rem;}
+  ul,ol{margin:0 0 1rem;padding-left:1.4rem;}
+  li{margin-bottom:.55rem;}
+  li::marker{color:var(--brand-dark);}
+
+  code{
+    background:var(--surface-2);
+    padding:.12rem .4rem;border-radius:5px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:.86em;
+    border:1px solid var(--line);
+  }
+
+  /* ---------- CALLOUTS ---------- */
+  .callout{
+    border-left:4px solid var(--brand);
+    background:rgba(66,184,131,.07);
+    padding:1rem 1.25rem;border-radius:0 10px 10px 0;margin:1.25rem 0;
+  }
+  .callout--ojo{border-left-color:var(--warn);background:var(--warn-bg);}
+  .callout--stop{border-left-color:var(--danger);background:rgba(192,57,43,.07);}
+  .callout p:last-child{margin-bottom:0;}
+  .callout strong:first-child{display:inline-block;margin-bottom:.25rem;}
+
+  /* ---------- PISTAS (details) ---------- */
+  details.pista{
+    border:1px dashed var(--line);
+    border-radius:10px;
+    padding:.85rem 1.1rem;
+    margin:1rem 0 0;
+    background:var(--surface-2);
+  }
+  details.pista[open]{border-style:solid;border-color:var(--brand);}
+  details.pista summary{
+    cursor:pointer;font-weight:700;font-size:.9rem;color:var(--brand-dark);
+    list-style:none;user-select:none;
+  }
+  details.pista summary::-webkit-details-marker{display:none;}
+  details.pista summary::before{content:"💡 ";}
+  details.pista summary:hover{text-decoration:underline;}
+  details.pista > *:not(summary){margin-top:.85rem;font-size:.92rem;color:var(--ink-soft);}
+  details.pista ul{margin-bottom:0;}
+
+  /* ---------- TABLA ---------- */
+  .tabla-scroll{overflow-x:auto;margin:1rem 0;-webkit-overflow-scrolling:touch;}
+  table{width:100%;border-collapse:collapse;font-size:.92rem;min-width:480px;}
+  th,td{text-align:left;padding:.7rem .85rem;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{background:var(--surface-2);font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);}
+  tbody tr:last-child td{border-bottom:none;}
+
+  /* ---------- NAV ---------- */
+  nav.indice{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:1.5rem;margin-bottom:2.5rem;box-shadow:var(--shadow);
+  }
+  nav.indice h2{margin:0 0 1rem;font-size:.82rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);}
+  nav.indice ol{margin:0;padding-left:1.3rem;columns:2;column-gap:2rem;}
+  nav.indice li{margin-bottom:.45rem;break-inside:avoid;}
+  nav.indice a{color:var(--accent);text-decoration:none;font-weight:600;font-size:.93rem;}
+  nav.indice a:hover{color:var(--brand-dark);text-decoration:underline;}
+  @media (max-width:600px){nav.indice ol{columns:1;}}
+
+  footer{
+    border-top:1px solid var(--line);
+    padding:2rem 0;text-align:center;color:var(--ink-soft);font-size:.85rem;
+  }
+
+  a{color:var(--brand-dark);}
+  :focus-visible{outline:3px solid var(--brand);outline-offset:2px;border-radius:4px;}
+
+  @media (max-width:640px){
+    section.bloque{padding:1.5rem 1.15rem;}
+    .wrap{padding:0 1rem;}
+    header.hero{padding:2.5rem 0 2rem;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="kicker">Módulo 7 · Lección 1 · Actividad práctica</span>
+    <h1>Cartelera Cultural</h1>
+    <p class="lead">
+      Construye una aplicación Vue 3 completa, desde cero, aplicando todo lo trabajado en la clase de hoy.
+      Aquí no hay código para copiar: hay un cliente, un problema y requisitos. Tú decides cómo resolverlo.
+    </p>
+
+    <div class="hero-facts">
+      <div class="fact"><strong>5 bloques</strong>en orden, a tu ritmo</div>
+      <div class="fact"><strong>Vue 3</strong>Composition API</div>
+      <div class="fact"><strong>Individual</strong>o en parejas</div>
+      <div class="fact"><strong>Sin librerías</strong>solo Vue y CSS</div>
+    </div>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+
+
+  <nav class="indice">
+    <h2>Ruta de trabajo</h2>
+    <ol>
+      <li><a href="#contexto">El encargo</a></li>
+      <li><a href="#datos">Los datos</a></li>
+      <li><a href="#b1">Componentización y props</a></li>
+      <li><a href="#b2">Emits</a></li>
+      <li><a href="#b3">Clases y estilos dinámicos</a></li>
+      <li><a href="#b4">Ciclo de vida</a></li>
+      <li><a href="#b5">Buscador y estado vacío</a></li>
+      <li><a href="#extra">Si terminas antes</a></li>
+    </ol>
+  </nav>
+
+<!-- ============ CONTEXTO ============ -->
+<section class="bloque" id="contexto">
+  <div class="bloque__head">
+    <span class="num">📋</span>
+    <h2>El encargo</h2>
+    <span class="tag">Contexto</span>
+  </div>
+
+  <p>
+    El <strong>Centro Cultural de tu comuna</strong> organiza talleres, conciertos, obras de teatro y
+    exposiciones. Hoy administran todo en una planilla Excel que se les descuadra cada semana:
+    venden entradas de eventos ya llenos, nadie sabe qué función está por comenzar y la cartelera
+    del sitio web la actualiza a mano una persona que ya se aburrió de hacerlo.
+  </p>
+
+  <p>
+    Te contratan para construir el <strong>panel interno de gestión de la cartelera</strong>: una
+    aplicación de una sola página donde el equipo pueda ver los eventos, reservar cupos y marcar
+    favoritos.
+  </p>
+
+  <p>
+    <strong>Tu trabajo es traducir estos requisitos a componentes Vue.</strong> No te vamos a decir
+    cuántos componentes crear ni cómo nombrarlos. Esa decisión es parte de la evaluación: leer un
+    problema e identificar dónde están las piezas reutilizables es exactamente lo que hace un
+    desarrollador frontend.
+  </p>
+
+  <div class="callout">
+    <strong>Lo primero no es teclear, es pensar.</strong>
+    <p>
+      Dibuja la interfaz en papel. Encierra con un lápiz cada bloque que se repite o que tiene
+      responsabilidad propia. Cada círculo es un componente candidato. Ese dibujo es tu arquitectura,
+      y es justamente lo que evita que a mitad de camino tengas que rehacerlo todo.
+    </p>
+  </div>
+
+  <div class="callout callout--ojo">
+    <strong>Cómo usar esta guía.</strong>
+    <p>
+      Son cinco bloques. Trabájalos <strong>en orden</strong> y no pases al
+      siguiente hasta que el anterior funcione: cada uno se apoya en el anterior. Aquí no hay código
+      para copiar, y es a propósito. Cada bloque tiene una <em>pista</em> plegada al final —
+      ábrela solo cuando lleves un rato realmente atascado. Si las abres todas antes de intentarlo,
+      esta actividad no te va a servir de nada.
+    </p>
+  </div>
+</section>
+
+<!-- ============ DATOS ============ -->
+<section class="bloque" id="datos">
+  <div class="bloque__head">
+    <span class="num">🗂️</span>
+    <h2>Los datos con los que trabajas</h2>
+    <span class="tag">Modelo</span>
+  </div>
+
+  <p>
+    Cada evento de la cartelera tiene la siguiente información. Construye el arreglo inicial
+    con <strong>5 eventos</strong>, variados: algunos llenos, otros con pocos cupos, de distintas
+    categorías. Si todos tus eventos son iguales, no vas a poder probar nada.
+  </p>
+
+  <div class="tabla-scroll">
+  <table>
+    <thead>
+      <tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>id</td><td>Número</td><td>Identificador único e irrepetible</td></tr>
+      <tr><td>titulo</td><td>Texto</td><td>Nombre del evento</td></tr>
+      <tr><td>categoria</td><td>Texto</td><td>Taller · Concierto · Teatro · Exposición</td></tr>
+      <tr><td>cuposTotales</td><td>Número</td><td>Capacidad máxima del recinto</td></tr>
+      <tr><td>cuposReservados</td><td>Número</td><td>Cuántos ya se reservaron</td></tr>
+      <tr><td>precio</td><td>Número</td><td>Valor de la entrada. <code>0</code> significa gratuito</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout callout--ojo">
+    <strong>Ojo con esto:</strong>
+    <p>
+      Fíjate que <strong>no existe</strong> un campo <code>cuposDisponibles</code> ni un campo
+      <code>estaLleno</code>. Y no es un olvido. Guardar en el estado algo que puedes calcular a
+      partir de otros datos es la forma más rápida de que tu aplicación muestre información
+      contradictoria. Piensa qué herramienta de Vue existe justamente para eso.
+    </p>
+  </div>
+</section>
+<!-- ============ BLOQUE 1 ============ -->
+<section class="bloque" id="b1">
+  <div class="bloque__head">
+    <span class="num">1</span>
+    <h2>Componentización y props</h2>
+    <span class="tag">Base</span>
+  </div>
+
+  <h3>Lo que debe hacer tu aplicación</h3>
+  <ul>
+    <li>Mostrar la cartelera completa de eventos en pantalla.</li>
+    <li>Cada evento se representa con una unidad visual idéntica en estructura y distinta en contenido, viviendo en su propio archivo dentro de <code>src/components/</code>.</li>
+    <li>Si agregas o quitas un evento del arreglo de datos, la vista debe reflejarlo sin que toques el template.</li>
+    <li>Cada propiedad que recibe el componente hijo declara <strong>su tipo de dato</strong>, y las imprescindibles están marcadas como obligatorias.</li>
+    <li>Al menos una propiedad tiene valor por defecto.</li>
+    <li>El precio se muestra formateado como moneda chilena. Si el evento es gratuito, debe decir <em>"Gratis"</em>, no <em>"$0"</em>.</li>
+    <li>Se muestran los cupos disponibles y el porcentaje de ocupación, <strong>calculados</strong> a partir de los datos originales.</li>
+  </ul>
+
+  <h3>Lo que se te va a evaluar</h3>
+  <ul>
+    <li>Que hayas identificado correctamente cuál es la unidad repetible de la interfaz.</li>
+    <li>Que <code>App.vue</code> no sea un archivo gigante con todo el HTML dentro.</li>
+    <li>Que ningún componente hijo modifique una propiedad que recibió. Esto es innegociable.</li>
+    <li>Que la consola del navegador esté <strong>limpia</strong>: sin advertencias de Vue.</li>
+  </ul>
+
+  <details class="pista">
+    <summary>Pista — si no sabes por dónde empezar</summary>
+    <ul>
+      <li>La directiva que recorre colecciones necesita <strong>siempre</strong> un atributo de identidad acompañándola. Debe ser único y estable: el índice de la posición <em>no</em> lo es si la lista se filtra, y en esta actividad se va a filtrar.</li>
+      <li>Regla práctica: si el mismo bloque de HTML aparece más de una vez y solo cambian los datos, ahí hay un componente esperando a salir.</li>
+      <li>Declarar las propiedades como un arreglo de nombres es la versión pobre. Declararlas como un objeto te permite tipo, obligatoriedad y valor por defecto. Usa siempre la segunda.</li>
+      <li>Para el formato de moneda no necesitas ninguna librería. El navegador ya trae una API de internacionalización nativa. Busca <code>Intl.NumberFormat</code> con la configuración regional <code>es-CL</code>.</li>
+      <li>Un porcentaje de ocupación es un dato derivado. Si lo escribes con una operación matemática dentro del template, funciona — pero se recalcula siempre. Existe algo mejor.</li>
+    </ul>
+  </details>
+</section>
+
+<!-- ============ BLOQUE 2 ============ -->
+<section class="bloque" id="b2">
+  <div class="bloque__head">
+    <span class="num">2</span>
+    <h2>Emits: comunicación hacia el padre</h2>
+    <span class="tag">Comunicación</span>
+  </div>
+
+  <h3>Lo que debe hacer tu aplicación</h3>
+  <ul>
+    <li><strong>Reservar un cupo:</strong> desde la tarjeta de un evento se puede reservar. El contador de cupos reservados sube y los disponibles bajan.</li>
+    <li><strong>Marcar como favorito:</strong> se puede alternar el estado de destacado de un evento.</li>
+    <li>Cuando un evento llega a su capacidad máxima, el botón de reservar queda deshabilitado. No debe ser posible reservar más cupos de los que existen. Ni uno.</li>
+    <li>Debe mostrarse el total de cupos reservados en toda la cartelera, en algún lugar visible del componente raíz.</li>
+  </ul>
+
+  <h3>Lo que se te va a evaluar</h3>
+  <ul>
+    <li>Que el componente hijo <strong>solo avise</strong> de que algo ocurrió. Toda decisión sobre los datos la toma quien es dueño de los datos.</li>
+    <li>Que los eventos que puede emitir cada componente estén declarados explícitamente.</li>
+    <li>Que el nombre de cada evento describa lo que <em>pasó</em>, no lo que el padre <em>debe hacer</em>.</li>
+    <li>Que la información que viaja junto al evento sea la mínima necesaria para que el padre actúe.</li>
+  </ul>
+
+  <div class="callout callout--stop">
+    <strong>Trampa habitual:</strong>
+    <p>
+      Va a llegar el momento en que descubras que sería mucho más fácil que el hijo modifique
+      directamente el objeto que recibió. Va a funcionar. Y va a ser un error de diseño que rompe
+      el flujo de datos y deja tu componente inútil en cualquier otro contexto. Resiste la tentación.
+    </p>
+  </div>
+
+  <details class="pista">
+    <summary>Pista — cómo pensar la comunicación</summary>
+    <ul>
+      <li>La regla que ordena todo esto: <em>las propiedades bajan, los eventos suben</em>. Si te encuentras haciendo lo contrario, párate y replantea.</li>
+      <li>Los nombres de eventos personalizados se escriben separados por guiones, en minúscula. HTML no distingue mayúsculas de minúsculas, y por eso el camelCase te va a fallar silenciosamente en el template.</li>
+      <li>Sobre los nombres: <code>cupo-reservado</code> describe un hecho. <code>actualizar-contador</code> describe una orden. El primero deja al componente reutilizable, el segundo lo amarra a un caso de uso concreto.</li>
+      <li>El total de cupos reservados de toda la cartelera es, otra vez, un dato derivado. No lo guardes aparte.</li>
+    </ul>
+  </details>
+</section>
+
+<!-- ============ BLOQUE 3 ============ -->
+<section class="bloque" id="b3">
+  <div class="bloque__head">
+    <span class="num">3</span>
+    <h2>Clases y estilos dinámicos</h2>
+    <span class="tag">Presentación</span>
+  </div>
+
+  <h3>Lo que debe hacer tu aplicación</h3>
+  <ul>
+    <li>Cada tarjeta de evento cambia de apariencia según su nivel de ocupación:
+      <ul>
+        <li>Menos del 50% de cupos ocupados → estado disponible</li>
+        <li>Entre 50% y 99% → estado por agotarse</li>
+        <li>100% → estado agotado, visualmente inconfundible</li>
+      </ul>
+    </li>
+    <li>Los eventos marcados como favoritos se distinguen visualmente de los demás.</li>
+    <li>Debe existir una barra de progreso que represente el porcentaje de ocupación, cuyo ancho se calcule a partir de los datos reales.</li>
+    <li>Todos los estilos de cada componente deben estar acotados a ese componente y no filtrarse al resto de la aplicación.</li>
+  </ul>
+
+  <h3>Lo que se te va a evaluar</h3>
+  <ul>
+    <li>Que uses enlace de clases para los estados con nombre, y enlace de estilos solo para valores numéricos verdaderamente dinámicos — como el ancho de esa barra.</li>
+    <li>Que la lógica que decide qué clase aplicar viva en el bloque de script, no enredada dentro del template.</li>
+    <li>Que la interfaz no comunique información <strong>únicamente</strong> por color. Un evento agotado debe ser reconocible para alguien que no distingue colores.</li>
+    <li>Que los elementos interactivos tengan un área táctil de al menos 44 píxeles.</li>
+  </ul>
+
+  <details class="pista">
+    <summary>Pista — bindings y encapsulación</summary>
+    <ul>
+      <li>El atributo estático de clase y su versión enlazada pueden convivir en el mismo elemento: no se pisan, se combinan. Usa el estático para lo fijo y el enlazado para lo condicional.</li>
+      <li>El enlace de clases acepta un objeto donde la clave es la clase y el valor decide si se aplica, o un arreglo que mezcla ambas formas. Cuando la lógica crece, muévela a un valor calculado y deja el template limpio.</li>
+      <li>En el enlace de estilos, las propiedades CSS se escriben en camelCase. Y no olvides concatenar la unidad de medida: un número suelto no es un valor válido en CSS.</li>
+      <li>La palabra clave que encapsula los estilos de un componente va junto a la etiqueta de estilo. Quítala una vez, observa cómo tus reglas contaminan toda la aplicación, y vuelve a ponerla. Esa es la lección.</li>
+    </ul>
+  </details>
+</section>
+
+<!-- ============ BLOQUE 4 ============ -->
+<section class="bloque" id="b4">
+  <div class="bloque__head">
+    <span class="num">4</span>
+    <h2>Ciclo de vida</h2>
+    <span class="tag">Crítico</span>
+  </div>
+
+  <h3>Lo que debe hacer tu aplicación</h3>
+  <ul>
+    <li>Los eventos <strong>no</strong> están disponibles al instante: deben cargarse de forma asíncrona simulando una llamada a un servidor, con un retardo de aproximadamente un segundo.</li>
+    <li>Mientras los datos cargan, el usuario debe ver un indicador de carga. La pantalla nunca queda en blanco.</li>
+    <li>Debe existir un contador de segundos de sesión que se actualice cada segundo en algún lugar de la interfaz.</li>
+    <li>Ese contador debe <strong>detenerse correctamente</strong> cuando el componente que lo contiene desaparece de pantalla.</li>
+    <li>Para poder demostrar el punto anterior, agrega un botón que muestre y oculte ese componente.</li>
+  </ul>
+
+  <div class="callout callout--stop">
+    <strong>Esto es lo más importante de toda la actividad.</strong>
+    <p>
+      Todo proceso que enciendas cuando el componente aparece — temporizadores, escuchas de eventos
+      del navegador, suscripciones — tienes que apagarlo cuando el componente desaparece. Si no lo
+      haces, el proceso sigue corriendo para siempre, invisible, consumiendo recursos. Se llama
+      fuga de memoria, y es la razón por la que muchas aplicaciones web se ponen lentas después de
+      veinte minutos de uso. Vas a tener que demostrar que tu limpieza funciona.
+    </p>
+  </div>
+
+  <h3>Lo que se te va a evaluar</h3>
+  <ul>
+    <li>Que puedas explicar por qué elegiste un gancho concreto y no otro para cada tarea.</li>
+    <li>Que tu limpieza esté implementada y que puedas demostrarla: muestra y oculta el componente cinco veces seguidas y prueba que no quedaron procesos vivos.</li>
+  </ul>
+
+  <details class="pista">
+    <summary>Pista — sobre ganchos y limpieza</summary>
+    <ul>
+      <li>En la API de Composición no existen ganchos equivalentes a las dos primeras fases del ciclo de vida. El cuerpo del bloque de configuración <em>ya es</em> esa etapa. No los busques: no están.</li>
+      <li>Cualquier cosa que necesite que el DOM exista va en el gancho de montaje. Ahí también va la carga de datos.</li>
+      <li>Para simular una espera asíncrona, envuelve un temporizador dentro de una promesa y espérala. Tres líneas, sin librerías.</li>
+      <li>Guarda el identificador que te devuelve el temporizador en una variable del ámbito del bloque de configuración, para poder cancelarlo desde el gancho de desmontaje.</li>
+      <li>Para probar el desmontaje, deja abierta la consola mientras enciendes y apagas el componente. Si el contador sigue avanzando después de apagarlo, tu limpieza no funciona.</li>
+    </ul>
+  </details>
+</section>
+
+<!-- ============ BLOQUE 5 ============ -->
+<section class="bloque" id="b5">
+  <div class="bloque__head">
+    <span class="num">5</span>
+    <h2>Buscador y estado vacío</h2>
+    <span class="tag">Experiencia</span>
+  </div>
+
+  <h3>Lo que debe hacer tu aplicación</h3>
+  <ul>
+    <li>Un buscador por título que filtre la cartelera mientras el usuario escribe.</li>
+    <li>Debe mostrarse cuántos resultados hay a la vista sobre el total.</li>
+    <li>Cuando la búsqueda no arroja resultados, un mensaje comprensible en lenguaje humano y un botón que permita limpiar el buscador y salir del callejón sin salida.</li>
+  </ul>
+
+  <h3>Lo que se te va a evaluar</h3>
+  <ul>
+    <li>Que la lista filtrada sea un valor derivado, no un arreglo paralelo que mantienes a mano.</li>
+    <li>Que el arreglo original de eventos nunca se destruya al filtrar. Si al buscar pierdes los datos, el filtro está mal construido.</li>
+    <li>Que los mensajes al usuario estén escritos para personas, no para programadores.</li>
+  </ul>
+
+  <details class="pista">
+    <summary>Pista — filtrar sin romper nada</summary>
+    <ul>
+      <li>Filtrar significa <em>derivar una lista nueva</em> desde la original, no reemplazarla. Si usas un método que muta el arreglo, perdiste los datos.</li>
+      <li>Normaliza a minúsculas ambos lados de la comparación. Si no lo haces, buscar "teatro" no va a encontrar "Teatro" y el usuario va a pensar que tu app está rota.</li>
+      <li>Para enlazar el campo de búsqueda con el estado en ambos sentidos hay una directiva específica. Tiene un modificador que recorta los espacios sobrantes — útil acá.</li>
+    </ul>
+  </details>
+</section>
+
+<!-- ============ EXTRA ============ -->
+<section class="bloque" id="extra">
+  <div class="bloque__head">
+    <span class="num">🚀</span>
+    <h2>Si terminas antes</h2>
+    <span class="tag">Opcional</span>
+  </div>
+
+  <p>
+    Solo si los cinco bloques anteriores están terminados y funcionando. No empieces por acá:
+    entregar cinco cosas a medias vale menos que entregar el núcleo completo y sólido.
+    Están ordenados de menor a mayor dificultad — súbelos de a uno.
+  </p>
+
+  <h3>Nivel 1 — completar el flujo</h3>
+  <ol>
+    <li><strong>Liberar cupo:</strong> la operación inversa a reservar, con la misma coherencia de datos.</li>
+    <li><strong>Cancelar evento:</strong> quitar un evento de la cartelera, pidiendo confirmación al usuario antes. Piensa bien dónde va esa confirmación: ¿en el hijo que avisa o en el padre que ejecuta la acción destructiva?</li>
+    <li><strong>Filtro por categoría</strong> que se combine con el buscador. Encadena las condiciones dentro de un único valor derivado, no hagas dos listas separadas.</li>
+    <li><strong>Filtro de solo disponibles</strong>, combinable con los dos anteriores.</li>
+    <li><strong>Notificación temporal:</strong> que cada acción del usuario tenga una respuesta visible que desaparezca sola a los pocos segundos. Acuérdate de cancelar el temporizador anterior si llega una notificación nueva.</li>
+    <li><strong>Validador de propiedad:</strong> que la categoría del evento valide que su contenido esté dentro del conjunto de valores permitidos.</li>
+  </ol>
+
+  <h3>Nivel 2 — composición</h3>
+  <ol>
+    <li><strong>Slots:</strong> crea un componente contenedor genérico y reutilizable (un panel o sección) que se use al menos tres veces con contenidos distintos. Debe aceptar contenido en zonas identificadas —encabezado, cuerpo, acciones—, mostrar contenido de reemplazo cuando el padre no envía nada, y no renderizar la zona de acciones si nadie le pasó botones. Ese contenedor no debe saber nada de eventos culturales: tiene que poder copiarse a otro proyecto sin tocar una línea.</li>
+    <li><strong>Componentes dinámicos:</strong> agrega tres secciones navegables por pestañas sin usar enrutador — cartelera, resumen del mes y notas del equipo. Las pestañas se generan recorriendo una estructura de datos, no escribiendo tres bloques repetidos. Si el usuario escribe una nota, cambia de pestaña y vuelve, su texto debe seguir ahí: perder lo que el usuario escribió es inaceptable.</li>
+    <li><strong>Accesibilidad de las pestañas:</strong> que comuniquen cuál está seleccionada a un lector de pantalla, no solo con color. Revisa los roles y atributos ARIA del patrón <em>tabs</em>.</li>
+    <li><strong>Ganchos de activación:</strong> el componente incorporado que conserva el estado habilita dos ganchos del ciclo de vida que solo existen bajo su alcance. Descubre cuáles son, cuándo se disparan y en qué se diferencian del montaje y desmontaje.</li>
+    <li><strong>Ordenamiento:</strong> permitir ordenar la cartelera por precio o por disponibilidad.</li>
+    <li><strong>Control de estilo en vivo:</strong> un selector de color de acento o de tamaño de texto que modifique la apariencia en tiempo real. Y busca la forma moderna de enlazar una variable del script directamente dentro de una regla CSS, sin ensuciar el template con estilos en línea — está disponible desde Vue 3.2.</li>
+  </ol>
+
+  <h3>Nivel 3 — para quien quiera ir en serio</h3>
+  <ol>
+    <li><strong>Persistencia:</strong> que las reservas y los favoritos sobrevivan a un refresco de página usando el almacenamiento del navegador.</li>
+    <li><strong>Formulario de creación:</strong> agregar eventos nuevos desde la interfaz, con validación de todos los campos y mensajes de error específicos por campo.</li>
+    <li><strong>Contenido inyectado con datos:</strong> que el componente que lista los eventos exponga los datos de cada elemento hacia el contenido que le inyecta el padre, de modo que el padre decida cómo se ve cada tarjeta sin tocar el componente de la lista.</li>
+    <li><strong>Composable propio:</strong> extraer toda la lógica de gestión de eventos a una función reutilizable fuera de los componentes. Si logras esto y entiendes por qué es mejor, comprendiste el sentido real de la API de Composición.</li>
+    <li><strong>Modo oscuro:</strong> con conmutador y respetando la preferencia del sistema operativo.</li>
+  </ol>
+
+  <div class="callout">
+    <strong>Última cosa, y la más importante de todas.</strong>
+    <p>
+      Va a haber un momento en que te trabes. Es el momento más valioso de esta actividad. Antes de
+      buscar la respuesta, escribe en un papel qué esperabas que pasara y qué pasó realmente.
+      Esa diferencia es donde está el aprendizaje. Los conceptos primero, el código después — porque
+      el código lo escribe cualquiera, pero saber <em>por qué</em> se escribe así te separa del resto.
+    </p>
+  </div>
+</section>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    Módulo 7 · Lección 1 — Componentes y ciclo de vida en Vue 3 · Actividad práctica
+  </div>
+</footer>
+
+
+</body>
+</html>
